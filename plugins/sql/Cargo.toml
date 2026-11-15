@@ -1,0 +1,21 @@
+[package]
+name = "khonsu-plugin-sql"
+description = "KhonsuGraph data source: PostgreSQL, MySQL and SQLite tables as nodes and relationships"
+version = "0.3.0"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+khonsu-plugin-protocol.workspace = true
+khonsu-tables.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+postgres = "0.19"
+tokio-postgres-rustls = { version = "0.14", features = ["ring"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+webpki-roots = "1"
+mysql = { version = "28", default-features = false, features = ["minimal-rust", "rustls-tls-ring"] }
+rusqlite = { version = "0.42", features = ["bundled"] }
+
+[dev-dependencies]
+tempfile.workspace = true

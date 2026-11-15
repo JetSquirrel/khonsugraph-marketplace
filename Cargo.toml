@@ -1,0 +1,20 @@
+[workspace]
+resolver = "2"
+members = ["crates/khonsu-tables", "plugins/sql", "plugins/ducklocal"]
+
+[workspace.package]
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/JetSquirrel/khonsugraph-marketplace"
+
+[workspace.dependencies]
+# The plugin protocol lives with KhonsuGraph. Move `rev` forward when it changes.
+khonsu-plugin-protocol = { git = "https://github.com/JetSquirrel/KhonsuGraph", rev = "67fd910617924589ac476f16ffa17c43dd508f5f" }
+khonsu-tables = { path = "crates/khonsu-tables" }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+tempfile = "3"
+
+[profile.release]
+strip = true
+lto = "thin"

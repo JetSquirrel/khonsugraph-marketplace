@@ -1,0 +1,16 @@
+{
+  "id": "ducklocal",
+  "name": "DuckLocal",
+  "version": "0.3.0",
+  "protocol": 1,
+  "entry": ["khonsu-plugin-ducklocal"],
+  "description": "Parquet, CSV, JSON and DuckDB tables as nodes and relationships, read through DuckLocal",
+  "permissions": {
+    "read_files": true,
+    "commands": ["ducklocal"],
+    "notes": [
+      "Runs `ducklocal query` with the SQL of your mapping; a DuckDB file is opened read-only",
+      "The SQL you write can read whatever DuckDB can reach, including URLs"
+    ]
+  }
+}

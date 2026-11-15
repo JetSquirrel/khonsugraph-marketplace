@@ -1,0 +1,5 @@
+{
+  "name": "official",
+  "description": "Official KhonsuGraph plugins that are installed by name rather than bundled",
+  "plugins": []
+}

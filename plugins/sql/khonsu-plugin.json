@@ -1,0 +1,16 @@
+{
+  "id": "sql",
+  "name": "SQL",
+  "version": "0.3.0",
+  "protocol": 1,
+  "entry": ["khonsu-plugin-sql"],
+  "description": "PostgreSQL, MySQL and SQLite tables as nodes and relationships, mapped by hand or from primary and foreign keys",
+  "permissions": {
+    "network": ["The database server you configure"],
+    "read_files": true,
+    "notes": [
+      "Sends only SELECT statements, in a read-only session; a read-only database user is enough",
+      "Reads a local file only for a SQLite database or a CA certificate you point it at"
+    ]
+  }
+}

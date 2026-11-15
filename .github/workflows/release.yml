@@ -1,0 +1,121 @@
+name: Release plugins
+
+# Builds and releases each plugin whose version has no release yet, and lists
+# it in marketplace.json. A plugin that did not change version is not built.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'plugins/**'
+      - 'crates/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'scripts/**'
+      - '.github/workflows/release.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  # Where packages are served. {tag} is the release, <id>-v<version>. To serve
+  # them from somewhere else, set the repository variable PACKAGE_BASE_URL
+  # (for example https://marketplace.khonsugraph.com/{tag}) and upload there.
+  PACKAGE_BASE_URL: ${{ vars.PACKAGE_BASE_URL || format('https://github.com/{0}/releases/download/{{tag}}', github.repository) }}
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      plugins: ${{ steps.plan.outputs.plugins }}
+      any: ${{ steps.plan.outputs.any }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the manifests
+        run: python3 scripts/marketplace.py check
+      - name: Find versions not released yet
+        id: plan
+        run: python3 scripts/marketplace.py plan
+
+  build:
+    needs: plan
+    if: needs.plan.outputs.any == 'true'
+    strategy:
+      fail-fast: true
+      matrix:
+        include: ${{ fromJson(needs.plan.outputs.matrix) }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        if: matrix.compiled
+
+      - uses: Swatinem/rust-cache@v2
+        if: matrix.compiled
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Build
+        if: matrix.compiled
+        run: cargo build --release --locked -p khonsu-plugin-${{ matrix.plugin }}
+
+      - name: Pack
+        shell: bash
+        run: |
+          if [ "${{ matrix.compiled }}" = "true" ]; then
+            BIN="target/release/${{ matrix.bin }}"
+            [ "${{ runner.os }}" = "Windows" ] && BIN="$BIN.exe"
+            python3 scripts/marketplace.py pack "${{ matrix.plugin }}" --target "${{ matrix.target }}" --bin "$BIN" --out dist
+          else
+            python3 scripts/marketplace.py pack "${{ matrix.plugin }}" --target "${{ matrix.target }}" --out dist
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package-${{ matrix.plugin }}-${{ matrix.target }}
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    needs: [plan, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: package-*
+          path: dist
+          merge-multiple: true
+
+      - name: Publish a release for each plugin
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PLUGINS: ${{ needs.plan.outputs.plugins }}
+        run: |
+          echo "$PLUGINS" | python3 -c "import json,sys; [print(p['id'], p['version'], p['tag']) for p in json.load(sys.stdin)]" |
+          while read -r id version tag; do
+            gh release create "$tag" dist/"$id"-"$version"-*.zip \
+              --target "$GITHUB_SHA" \
+              --title "$id $version" \
+              --notes "The \`$id\` plugin at $version. Install it with \`khonsu plugin install $id\`." \
+              --latest=false
+          done
+
+      - name: List them in marketplace.json
+        run: |
+          python3 scripts/marketplace.py index dist --base-url "$PACKAGE_BASE_URL"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add marketplace.json
+          git commit -m "List $(echo '${{ needs.plan.outputs.plugins }}' | python3 -c "import json,sys; print(', '.join(p['id']+' '+p['version'] for p in json.load(sys.stdin)))")"
+          git push origin HEAD:main
