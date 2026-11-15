@@ -35,7 +35,7 @@
     {
       "id": "sql",
       "name": "SQL",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "description": "PostgreSQL, MySQL and SQLite tables as nodes and relationships, mapped by hand or from primary and foreign keys",
       "permissions": {
         "network": [
@@ -50,15 +50,15 @@
       "packages": [
         {
           "target": "macos-aarch64",
-          "url": "https://github.com/JetSquirrel/khonsugraph-marketplace/releases/download/sql-v0.3.0/sql-0.3.0-macos-aarch64.zip",
-          "sha256": "94dec851dfea01024144950bd287dfb012d063fb21c9fe5d08a52b3a01de7363",
-          "size": 3438707
+          "url": "https://marketplace.khonsugraph.com/sql-v0.3.1/sql-0.3.1-macos-aarch64.zip",
+          "sha256": "123395aad3ab8bbe7e99e7fe409066fc444bf8567467dd9224db04e10aefd911",
+          "size": 3438750
         },
         {
           "target": "windows-x86_64",
-          "url": "https://github.com/JetSquirrel/khonsugraph-marketplace/releases/download/sql-v0.3.0/sql-0.3.0-windows-x86_64.zip",
-          "sha256": "3c2ed11eeb5018fd28049c13121215a8366e158964c06942f3c734c8ced90ae4",
-          "size": 3619781
+          "url": "https://marketplace.khonsugraph.com/sql-v0.3.1/sql-0.3.1-windows-x86_64.zip",
+          "sha256": "8acc0a35350d525a9a0cdc9f64515f7daf65b90642436bbbdec5aab03735fe69",
+          "size": 3620187
         }
       ]
     }
