@@ -23,9 +23,9 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
-  # Where packages are served. {tag} is the release, <id>-v<version>. To serve
-  # them from somewhere else, set the repository variable PACKAGE_BASE_URL
-  # (for example https://marketplace.khonsugraph.com/{tag}) and upload there.
+  # Where packages are served. {tag} is the release, <id>-v<version>. With the
+  # repository variables PACKAGE_BASE_URL and R2_BUCKET set, that is an R2
+  # bucket behind a domain; without them, this repository's releases.
   PACKAGE_BASE_URL: ${{ vars.PACKAGE_BASE_URL || format('https://github.com/{0}/releases/download/{{tag}}', github.repository) }}
 
 jobs:
@@ -97,6 +97,7 @@ jobs:
           path: dist
           merge-multiple: true
 
+      # Every release is also on GitHub, whatever serves the packages.
       - name: Publish a release for each plugin
         env:
           GH_TOKEN: ${{ github.token }}
@@ -104,12 +105,42 @@ jobs:
         run: |
           echo "$PLUGINS" | python3 -c "import json,sys; [print(p['id'], p['version'], p['tag']) for p in json.load(sys.stdin)]" |
           while read -r id version tag; do
-            gh release create "$tag" dist/"$id"-"$version"-*.zip \
-              --target "$GITHUB_SHA" \
-              --title "$id $version" \
-              --notes "The \`$id\` plugin at $version. Install it with \`khonsu plugin install $id\`." \
-              --latest=false
+            if gh release view "$tag" >/dev/null 2>&1; then
+              # Left by a run that failed after this step: the packages built now replace its.
+              gh release upload "$tag" dist/"$id"-"$version"-*.zip --clobber
+            else
+              gh release create "$tag" dist/"$id"-"$version"-*.zip \
+                --target "$GITHUB_SHA" \
+                --title "$id $version" \
+                --notes "The \`$id\` plugin at $version. Install it with \`khonsu plugin install $id\`." \
+                --latest=false
+            fi
           done
+
+      - name: Upload the packages to R2
+        if: vars.R2_BUCKET != ''
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+          R2_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          PLUGINS: ${{ needs.plan.outputs.plugins }}
+        run: |
+          echo "$PLUGINS" | python3 -c "import json,sys; [print(p['id'], p['version'], p['tag']) for p in json.load(sys.stdin)]" |
+          while read -r id version tag; do
+            for file in dist/"$id"-"$version"-*.zip; do
+              aws s3 cp "$file" "s3://${{ vars.R2_BUCKET }}/$tag/$(basename "$file")" \
+                --endpoint-url "$R2_ENDPOINT" --content-type application/zip \
+                --cache-control "public, max-age=31536000, immutable"
+            done
+          done
+
+      # The index is only changed once every package can be fetched from the
+      # address it will be listed at, and is the bytes that were packed.
+      - name: Check the packages are served
+        run: python3 scripts/marketplace.py verify dist --base-url "$PACKAGE_BASE_URL"
 
       - name: List them in marketplace.json
         run: |
@@ -119,3 +150,17 @@ jobs:
           git add marketplace.json
           git commit -m "List $(echo '${{ needs.plan.outputs.plugins }}' | python3 -c "import json,sys; print(', '.join(p['id']+' '+p['version'] for p in json.load(sys.stdin)))")"
           git push origin HEAD:main
+
+      # The same index, beside the packages: https://<domain>/marketplace.json
+      - name: Upload the index to R2
+        if: vars.R2_BUCKET != ''
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+          R2_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+        run: |
+          aws s3 cp marketplace.json "s3://${{ vars.R2_BUCKET }}/marketplace.json" \
+            --endpoint-url "$R2_ENDPOINT" --content-type application/json --cache-control "public, max-age=300"

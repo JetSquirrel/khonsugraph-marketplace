@@ -641,7 +641,7 @@ dependencies = [
 
 [[package]]
 name = "khonsu-plugin-ducklocal"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "khonsu-plugin-protocol",
  "khonsu-tables",

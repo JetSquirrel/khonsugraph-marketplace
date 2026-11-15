@@ -5,11 +5,13 @@
     marketplace.py check                     every manifest is usable and agrees with its Cargo.toml
     marketplace.py guard BASE                a plugin changed since BASE has a version not released yet
     marketplace.py pack PLUGIN --target T [--bin FILE] --out DIR
+    marketplace.py verify DIR --base-url URL the packages in DIR are served at URL, byte for byte
     marketplace.py index DIR --base-url URL  list the packages in DIR in marketplace.json
 
-A plugin is released once per version: its tag is `<id>-v<version>`. Nothing
-is built for a plugin whose version already has a tag, so a push that touches
-one plugin builds one plugin, and to release a change is to raise its version.
+A plugin is released once per version, as the tag `<id>-v<version>`. Nothing
+is built for a plugin whose version marketplace.json already lists, so a push
+that touches one plugin builds one plugin, and to release a change is to raise
+its version.
 """
 import argparse
 import hashlib
@@ -17,6 +19,7 @@ import json
 import os
 import re
 import subprocess
+import urllib.request
 import sys
 import zipfile
 from pathlib import Path
@@ -45,8 +48,11 @@ def tag(manifest) -> str:
 
 
 def released_tags() -> set[str]:
-    out = subprocess.run(["git", "ls-remote", "--tags", "origin"], cwd=ROOT, capture_output=True, text=True, check=True).stdout
-    return {line.split("refs/tags/")[1].removesuffix("^{}") for line in out.splitlines() if "refs/tags/" in line}
+    """What marketplace.json lists, as tags. A version counts as released once
+    it is listed, which is the last step: a release that failed partway is not
+    listed, so the next run makes it again."""
+    listed = json.loads(INDEX.read_text()).get("plugins", [])
+    return {f"{entry['id']}-v{entry['version']}" for entry in listed if entry.get("packages")}
 
 
 def check() -> int:
@@ -176,6 +182,30 @@ def index(dist: str, base_url: str) -> int:
     return 0
 
 
+def verify(dist: str, base_url: str) -> int:
+    """Each package in `dist` can be downloaded from where the index will say it is, and is the same bytes."""
+    failed = False
+    for path in sorted(Path(dist).glob("*.zip.json")):
+        listing = json.loads(path.read_text())
+        package = listing["package"]
+        release = f"{listing['id']}-v{listing['version']}"
+        url = base_url.rstrip("/").format(tag=release) + "/" + package["file"]
+        try:
+            request = urllib.request.Request(url, headers={"User-Agent": "khonsugraph-marketplace"})
+            with urllib.request.urlopen(request, timeout=120) as response:
+                found = hashlib.sha256(response.read()).hexdigest()
+        except Exception as error:  # noqa: BLE001 - whatever went wrong, the package is not there
+            print(f"{url}: {error}", file=sys.stderr)
+            failed = True
+            continue
+        if found != package["sha256"]:
+            print(f"{url}: sha256 {found}, and {package['sha256']} was packed", file=sys.stderr)
+            failed = True
+        else:
+            print(f"{url}: ok")
+    return 1 if failed else 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -190,7 +220,12 @@ def main() -> int:
     listing = commands.add_parser("index")
     listing.add_argument("dist")
     listing.add_argument("--base-url", required=True, help="where packages are served; {tag} is the release, <id>-v<version>")
+    verifying = commands.add_parser("verify")
+    verifying.add_argument("dist")
+    verifying.add_argument("--base-url", required=True)
     args = parser.parse_args()
+    if args.command == "verify":
+        return verify(args.dist, args.base_url)
     if args.command == "plan":
         return plan()
     if args.command == "check":

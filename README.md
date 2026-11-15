@@ -34,8 +34,8 @@ it is the package listed, and it still needs your approval before it runs.
 **Raise its version** in `khonsu-plugin.json` (and its `Cargo.toml`), and merge
 to `main`. That is all.
 
-On each push to `main`, CI looks for plugins whose version has no release tag
-(`<id>-v<version>`). Only those are built, for macOS (arm64) and Windows
+On each push to `main`, CI looks for plugins whose version `marketplace.json`
+does not list yet. Only those are built, for macOS (arm64) and Windows
 (x86_64), packed, and attached to a release of that tag. `marketplace.json` is
 then updated with the new packages and their hashes, and committed. A plugin
 whose version did not change is not built, and its entry is left as it is.
@@ -71,8 +71,16 @@ khonsu plugin install dist/sql-0.3.0-macos-aarch64.zip    # try the package
 
 ## Where packages are served
 
-From this repository's releases. The index holds each package's full address,
-so they can move: set the repository variable `PACKAGE_BASE_URL` (for example
-`https://marketplace.khonsugraph.com/{tag}`, where `{tag}` is `<id>-v<version>`),
-add a step to `release.yml` that uploads `dist/*.zip` there, and the next
-releases are listed at the new address. Packages already listed keep theirs.
+From an R2 bucket behind `marketplace.khonsugraph.com`, at
+`/<id>-v<version>/<file>`, with the index itself at `/marketplace.json`. Every
+release is also attached to a GitHub release of the same tag.
+
+CI uploads with the repository secrets `R2_ACCESS_KEY_ID`,
+`R2_SECRET_ACCESS_KEY` and `R2_ACCOUNT_ID`, to the bucket in the variable
+`R2_BUCKET`, and lists packages under the variable `PACKAGE_BASE_URL`. Without
+those two variables it lists the GitHub release instead. Before the index is
+changed, each package is downloaded from the address it will be listed at and
+compared with what was packed.
+
+A release that fails partway is not listed, so pushing again (or running the
+workflow by hand) makes it again.
