@@ -1,5 +1,66 @@
 {
   "name": "official",
   "description": "Official KhonsuGraph plugins that are installed by name rather than bundled",
-  "plugins": []
+  "plugins": [
+    {
+      "id": "ducklocal",
+      "name": "DuckLocal",
+      "version": "0.3.0",
+      "description": "Parquet, CSV, JSON and DuckDB tables as nodes and relationships, read through DuckLocal",
+      "permissions": {
+        "read_files": true,
+        "commands": [
+          "ducklocal"
+        ],
+        "notes": [
+          "Runs `ducklocal query` with the SQL of your mapping; a DuckDB file is opened read-only",
+          "The SQL you write can read whatever DuckDB can reach, including URLs"
+        ]
+      },
+      "packages": [
+        {
+          "target": "macos-aarch64",
+          "url": "https://github.com/JetSquirrel/khonsugraph-marketplace/releases/download/ducklocal-v0.3.0/ducklocal-0.3.0-macos-aarch64.zip",
+          "sha256": "e8eef7e5d1b1eec76bab089f96d341b414423b0977d307098880d90d70f2a012",
+          "size": 406667
+        },
+        {
+          "target": "windows-x86_64",
+          "url": "https://github.com/JetSquirrel/khonsugraph-marketplace/releases/download/ducklocal-v0.3.0/ducklocal-0.3.0-windows-x86_64.zip",
+          "sha256": "4ccd55733658d62e9c191593b8c15b4d695fd556c1173816b85a420daa4b31d8",
+          "size": 375910
+        }
+      ]
+    },
+    {
+      "id": "sql",
+      "name": "SQL",
+      "version": "0.3.0",
+      "description": "PostgreSQL, MySQL and SQLite tables as nodes and relationships, mapped by hand or from primary and foreign keys",
+      "permissions": {
+        "network": [
+          "The database server you configure"
+        ],
+        "read_files": true,
+        "notes": [
+          "Sends only SELECT statements, in a read-only session; a read-only database user is enough",
+          "Reads a local file only for a SQLite database or a CA certificate you point it at"
+        ]
+      },
+      "packages": [
+        {
+          "target": "macos-aarch64",
+          "url": "https://github.com/JetSquirrel/khonsugraph-marketplace/releases/download/sql-v0.3.0/sql-0.3.0-macos-aarch64.zip",
+          "sha256": "94dec851dfea01024144950bd287dfb012d063fb21c9fe5d08a52b3a01de7363",
+          "size": 3438707
+        },
+        {
+          "target": "windows-x86_64",
+          "url": "https://github.com/JetSquirrel/khonsugraph-marketplace/releases/download/sql-v0.3.0/sql-0.3.0-windows-x86_64.zip",
+          "sha256": "3c2ed11eeb5018fd28049c13121215a8366e158964c06942f3c734c8ced90ae4",
+          "size": 3619781
+        }
+      ]
+    }
+  ]
 }
