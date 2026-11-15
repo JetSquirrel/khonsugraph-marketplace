@@ -1,7 +1,7 @@
 {
   "id": "sql",
   "name": "SQL",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "protocol": 1,
   "entry": ["khonsu-plugin-sql"],
   "description": "PostgreSQL, MySQL and SQLite tables as nodes and relationships, mapped by hand or from primary and foreign keys",
