@@ -5,7 +5,7 @@
     {
       "id": "ducklocal",
       "name": "DuckLocal",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "description": "Parquet, CSV, JSON and DuckDB tables as nodes and relationships, read through DuckLocal",
       "permissions": {
         "read_files": true,
@@ -20,14 +20,14 @@
       "packages": [
         {
           "target": "macos-aarch64",
-          "url": "https://github.com/JetSquirrel/khonsugraph-marketplace/releases/download/ducklocal-v0.3.0/ducklocal-0.3.0-macos-aarch64.zip",
-          "sha256": "e8eef7e5d1b1eec76bab089f96d341b414423b0977d307098880d90d70f2a012",
-          "size": 406667
+          "url": "https://marketplace.khonsugraph.com/ducklocal-v0.3.1/ducklocal-0.3.1-macos-aarch64.zip",
+          "sha256": "3ef5aef35ff6e3656de6836be0c32cce41277c380b044813fb851df53e8ed8d7",
+          "size": 406669
         },
         {
           "target": "windows-x86_64",
-          "url": "https://github.com/JetSquirrel/khonsugraph-marketplace/releases/download/ducklocal-v0.3.0/ducklocal-0.3.0-windows-x86_64.zip",
-          "sha256": "4ccd55733658d62e9c191593b8c15b4d695fd556c1173816b85a420daa4b31d8",
+          "url": "https://marketplace.khonsugraph.com/ducklocal-v0.3.1/ducklocal-0.3.1-windows-x86_64.zip",
+          "sha256": "460f4dfb4896913640e7889a06e4227c0bd11b8ecac37e7a9d420a2cfe7cc9a3",
           "size": 375910
         }
       ]
