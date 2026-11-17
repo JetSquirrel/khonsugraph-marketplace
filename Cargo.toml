@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/khonsu-tables", "plugins/sql", "plugins/ducklocal"]
+members = ["crates/khonsu-tables", "plugins/sql", "plugins/ducklocal", "plugins/aws", "plugins/neo4j"]
 
 [workspace.package]
 edition = "2021"
