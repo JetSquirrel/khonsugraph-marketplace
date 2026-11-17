@@ -3,6 +3,37 @@
   "description": "Official KhonsuGraph plugins that are installed by name rather than bundled",
   "plugins": [
     {
+      "id": "aws",
+      "name": "AWS",
+      "version": "0.3.0",
+      "description": "VPCs, subnets, security groups, EC2 instances, load balancers and IAM roles, and how they connect",
+      "permissions": {
+        "network": [
+          "*.amazonaws.com"
+        ],
+        "commands": [
+          "aws"
+        ],
+        "notes": [
+          "Read-only: ec2:Describe*, elasticloadbalancing:Describe*, iam:List*, sts:GetCallerIdentity"
+        ]
+      },
+      "packages": [
+        {
+          "target": "macos-aarch64",
+          "url": "https://marketplace.khonsugraph.com/aws-v0.3.0/aws-0.3.0-macos-aarch64.zip",
+          "sha256": "37d0850ce14304c2a4dd39f368fb856127ba9ceefc22a7d72dd1ee99915c7c84",
+          "size": 414105
+        },
+        {
+          "target": "windows-x86_64",
+          "url": "https://marketplace.khonsugraph.com/aws-v0.3.0/aws-0.3.0-windows-x86_64.zip",
+          "sha256": "78c28430f82cd50014bd41dd20409da44e990a4a6f375cb85f636b8fad5c56f9",
+          "size": 400494
+        }
+      ]
+    },
+    {
       "id": "ducklocal",
       "name": "DuckLocal",
       "version": "0.3.1",
@@ -29,6 +60,34 @@
           "url": "https://marketplace.khonsugraph.com/ducklocal-v0.3.1/ducklocal-0.3.1-windows-x86_64.zip",
           "sha256": "460f4dfb4896913640e7889a06e4227c0bd11b8ecac37e7a9d420a2cfe7cc9a3",
           "size": 375910
+        }
+      ]
+    },
+    {
+      "id": "neo4j",
+      "name": "Neo4j",
+      "version": "0.3.0",
+      "description": "Copies the nodes and relationships of a Neo4j database, such as one Cartography fills",
+      "permissions": {
+        "network": [
+          "The Neo4j server you configure"
+        ],
+        "notes": [
+          "Sends only read queries, in read access mode"
+        ]
+      },
+      "packages": [
+        {
+          "target": "macos-aarch64",
+          "url": "https://marketplace.khonsugraph.com/neo4j-v0.3.0/neo4j-0.3.0-macos-aarch64.zip",
+          "sha256": "ddd232ab381f3f2c99a8e86ed91b652c44f13d27c2643da3a7bdb424c30212d0",
+          "size": 1218925
+        },
+        {
+          "target": "windows-x86_64",
+          "url": "https://marketplace.khonsugraph.com/neo4j-v0.3.0/neo4j-0.3.0-windows-x86_64.zip",
+          "sha256": "a6ea878d76e95c04a00fb38f0eb72cc893d664b7ed62f16de5fbeadf24c33ae3",
+          "size": 1204791
         }
       ]
     },
