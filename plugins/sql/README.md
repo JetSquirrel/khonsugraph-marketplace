@@ -4,7 +4,7 @@ Tables of a PostgreSQL, MySQL or SQLite database as nodes and relationships.
 
 ```sh
 khonsu plugin install sql --yes
-khonsu init graphs/shop
+khonsu graph init graphs/shop
 khonsu source add --db graphs/shop --plugin sql --name shop \
   -c url=postgres://reader:secret@db.example.com:5432/shop --test
 khonsu plugin sync --source shop

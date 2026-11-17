@@ -10,7 +10,7 @@ khonsu plugin install sql --yes
 ```
 
 In the window: **Add source → More Plugins…**. KhonsuGraph looks here by
-default; to add it by hand, `khonsu marketplace add JetSquirrel/khonsugraph-marketplace`.
+default; to add it by hand, `khonsu plugin marketplace add JetSquirrel/khonsugraph-marketplace`.
 
 | Plugin | What |
 |---|---|
