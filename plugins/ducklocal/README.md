@@ -11,7 +11,7 @@ that puts it there), or its path in the `ducklocal` field.
 
 ```sh
 khonsu plugin install ducklocal --yes
-khonsu init graphs/shop
+khonsu graph init graphs/shop
 
 # A DuckDB database: mapped from its primary and foreign keys.
 khonsu source add --db graphs/shop --plugin ducklocal --name shop -c database=shop.duckdb --test
